@@ -1,0 +1,91 @@
+FEAP * * Tension Strip With Hole and Slit
+0 0 0 2 2 4
+PARAmeters
+  d=1            ! First node number
+  e=1            ! First element number
+  p=p           ! Interval [3, 15]
+  y=5            ! y_length of the plate
+  r=r			 ! Frequently set as 0.25
+  l=20
+  a=2
+  b=16
+  m=6
+  n=6
+  di=2*r
+                 ! Terminator
+REGIon 1         ! Assigns 1st quadrant to region 1
+  INCLude IHQUAD ! Input first quadrant
+PARAmeters
+  d=0            ! To make feap count nodes
+  e=0            ! To make feap count elements
+                 ! Terminator
+
+REGIon 2         ! Assigns 1st quadrant to region 1
+  INCLude IHQUAD-lower ! Input first quadrant
+
+!REGIon 3
+!  INCLude IHQUAD-right
+
+REGIon 0    ! Restore default
+EBOUndary SET
+  1 0 1 1
+  !2 0 1 1
+!EBOUndary,ADD
+!  1 0 2 0
+!  2 0 2 0
+
+           ! Termination
+
+EFORce           ! Coordinate specified forces
+ 1 l x y
+  
+            ! Blank termination record
+!REGIon 0    ! Restore default
+!EBOUndary
+!  2  8 0 1 0
+!  2 -8 0 1 0
+!           ! Termination
+!CBOUndary
+!  node -6 0 1 0
+!           ! Termination
+!EDISplacements
+!  2  8 0  0.5
+!  2 -8 0 -0.5
+!           ! Termination
+MATErial 1
+  SOLId
+  ELAStic ISOTopic 1000 0.25
+            ! Termination
+
+MATErial 2
+  SOLId
+  ELAStic ISOTopic 20000 0.25
+           ! Termination
+
+END mesh
+
+TIE REGIon 1 1
+TIE REGIon 2 2
+TIE REGIon 1 2
+!TIE REGIon 3 3
+!TIE REGIon 1 3
+!TIE REGIon 2 3
+
+
+
+BATCh
+  CHECk
+  TANGent         ! Form tangent  (K)
+  FORM            ! Form residual (R)
+  SOLVe           ! Solve K*du = R
+  DISPlacement ALL
+  stresses NODE all
+  OUTmesh
+END               ! End of batch execution
+
+!BATCh
+!plot,mesh
+!plot,cont,1
+!END
+!INTEractive
+!STOP
